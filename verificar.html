@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificar Certificado - CESDE</title>
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <header class="app-header">
+            <div class="logo-container">
+                <img src="assets/images/logo-cesde.png" alt="Logo CESDE" class="logo">
+                <h1>Sistema de Verificación de Certificados</h1>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div class="certificate-verifier">
+                <div class="form-container">
+                    <h2><i class="fas fa-qrcode"></i> Verificar Certificado</h2>
+                    <form id="verificationForm">
+                        <div class="input-group">
+                            <label for="verificationMethod">Método de Verificación</label>
+                            <select id="verificationMethod" required>
+                                <option value="">Seleccione...</option>
+                                <option value="code">Código de Certificado</option>
+                                <option value="qr">Escaneo QR</option>
+                                <option value="document">Documento de Identidad</option>
+                            </select>
+                        </div>
+
+                        <div id="codeInputGroup" class="input-group" style="display: none;">
+                            <label for="certificateCode">Código del Certificado</label>
+                            <input type="text" id="certificateCode" placeholder="Ingrese el código del certificado">
+                            <div class="input-hint">Ejemplo: CESDE-CERT-2025-001</div>
+                        </div>
+
+                        <div id="qrScanner" class="qr-scanner" style="display: none;">
+                            <div class="scanner-placeholder">
+                                <i class="fas fa-camera"></i>
+                                <p>Área de escaneo QR</p>
+                            </div>
+                            <button type="button" class="btn-secondary" id="startScanner">
+                                <i class="fas fa-camera"></i> Iniciar Escáner
+                            </button>
+                        </div>
+
+                        <div id="documentInputGroup" class="input-group" style="display: none;">
+                            <label for="verificationDocumentType">Tipo de Documento</label>
+                            <select id="verificationDocumentType">
+                                <option value="">Seleccione...</option>
+                                <option value="CC">Cédula de Ciudadanía</option>
+                                <option value="TI">Tarjeta de Identidad</option>
+                                <option value="CE">Cédula de Extranjería</option>
+                                <option value="PA">Pasaporte</option>
+                            </select>
+
+                            <label for="verificationDocumentNumber">Número de Documento</label>
+                            <input type="text" id="verificationDocumentNumber" placeholder="Ingrese su documento">
+                        </div>
+
+                        <button type="submit" class="btn-primary">
+                            <i class="fas fa-search"></i> Verificar Certificado
+                        </button>
+                    </form>
+                </div>
+
+                <div id="certificateResult" class="certificate-result" style="display: none;">
+                    <h3><i class="fas fa-certificate"></i> Resultado de Verificación</h3>
+                    
+                    <div class="verification-status">
+                        <i class="fas fa-check-circle status-valid"></i>
+                        <span id="statusText">Certificado válido</span>
+                    </div>
+
+                    <div class="certificate-details">
+                        <div class="detail-item">
+                            <span class="detail-label">Código:</span>
+                            <span id="verifiedCode" class="detail-value"></span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Estudiante:</span>
+                            <span id="verifiedStudent" class="detail-value"></span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Documento:</span>
+                            <span id="verifiedDocument" class="detail-value"></span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Programa:</span>
+                            <span id="verifiedProgram" class="detail-value"></span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Fecha de Emisión:</span>
+                            <span id="verifiedDate" class="detail-value"></span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Estado:</span>
+                            <span id="verifiedStatus" class="detail-value"></span>
+                        </div>
+                    </div>
+
+                    <div class="actions">
+                        <button id="viewCertificateBtn" class="btn-primary">
+                            <i class="fas fa-eye"></i> Ver Certificado Completo
+                        </button>
+                        <button id="downloadCertificateBtn" class="btn-success">
+                            <i class="fas fa-download"></i> Descargar Certificado
+                        </button>
+                    </div>
+                </div>
+
+                <div id="loadingIndicator" class="loading-indicator">
+                    <div class="spinner"></div>
+                    <p>Verificando certificado...</p>
+                </div>
+
+                <div id="errorMessage" class="error-message"></div>
+            </div>
+        </main>
+
+        <footer class="app-footer">
+            <p>© 2023 Centro de Estudios Especializados - CESDE</p>
+            <p>Sistema de Certificados Académicos v1.0</p>
+        </footer>
+    </div>
+
+    <script src="assets/js/verification.js"></script>
+</body>
+</html>

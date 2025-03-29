@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Certificados - CESDE</title>
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Estilos CSS para la firma */
+        .signature-container {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+            background: #f9f9f9;
+            margin: 20px 0;
+        }
+        
+        .signature-canvas {
+            border: 1px solid #ccc;
+            background: white;
+            width: 100%;
+            height: 150px;
+            touch-action: none;
+        }
+        
+        .signature-line {
+            border-top: 1px dashed #888;
+            margin: 10px 0;
+        }
+        
+        .signature-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+        
+        .btn-signature {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 14px;
+        }
+        
+        .btn-clear {
+            background-color: #ff6b6b;
+            color: white;
+        }
+        
+        .btn-save {
+            background-color: #4CAF50;
+            color: white;
+        }
+        
+        .btn-load {
+            background-color: #2196F3;
+            color: white;
+        }
+        
+        .btn-signature:hover {
+            opacity: 0.9;
+        }
+        
+        .btn-signature i {
+            font-size: 14px;
+        }
+        
+        #signatureFileInput {
+            display: none;
+        }
+        
+        .signature-preview {
+            max-width: 200px;
+            max-height: 80px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <header class="app-header">
+            <div class="logo-container">
+                <img src="assets/images/logo-cesde.png" alt="Logo CESDE" class="logo">
+                <h1>Sistema de Certificados Académicos</h1>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div class="certificate-generator">
+                <div class="form-container">
+                    <h2><i class="fas fa-user-graduate"></i> Generar Certificado</h2>
+                    <form id="certificateForm">
+                        <div class="input-group">
+                            <label for="studentNameInput">Nombre Completo del Estudiante</label>
+                            <input type="text" id="studentNameInput" placeholder="Ingrese el nombre completo" required>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="documentType">Tipo de Documento</label>
+                            <select id="documentType" required>
+                                <option value="">Seleccione...</option>
+                                <option value="CC">Cédula de Ciudadanía</option>
+                                <option value="TI">Tarjeta de Identidad</option>
+                                <option value="CE">Cédula de Extranjería</option>
+                                <option value="PA">Pasaporte</option>
+                            </select>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="documentNumber">Número de Documento</label>
+                            <input type="text" id="documentNumber" placeholder="Ingrese el número de documento" required>
+                            <div class="input-hint">Ejemplo: 1234567890</div>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="program">Programa Académico</label>
+                            <select id="program" required>
+                                <option value="">Seleccione...</option>
+                                <option value="Auxiliar en Desarrollo de Aplicaciones Informáticas">Auxiliar en Desarrollo de Aplicaciones Informáticas</option>
+                                <option value="Diseño Gráfico">Diseño Gráfico</option>
+                                <option value="Contabilidad y Finanzas">Contabilidad y Finanzas</option>
+                                <option value="Enfermería">Enfermería</option>
+                            </select>
+                        </div>
+                        
+                        <button type="submit" class="btn-primary">
+                            <i class="fas fa-file-certificate"></i> Generar Certificado
+                        </button>
+                    </form>
+                </div>
+
+                <div id="studentInfo" class="student-info-container" style="display: none;">
+                    <h3><i class="fas fa-info-circle"></i> Información del Certificado</h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span class="info-label">Nombre:</span>
+                            <span id="studentName" class="info-value"></span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Documento:</span>
+                            <span id="studentDocument" class="info-value"></span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Programa:</span>
+                            <span id="studentProgram" class="info-value"></span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Periodo:</span>
+                            <span id="studentPeriod" class="info-value">2025-1</span>
+                        </div>
+                    </div>
+                    
+                    <div class="certificate-preview" id="certificatePreview" style="display: none; margin-top: 20px;">
+                        <div class="certificate-header">
+                            <div class="certificate-title">REGISTRO Y CONTROL CESDE</div>
+                            <div class="certificate-subtitle">LICENCIA DE FUNCIONAMIENTO DE LA SECRETARÍA DE EDUCACIÓN</div>
+                            <div>DEL MUNICIPIO DE LA PINTADA 2020060127237 DE 2020-12-02</div>
+                            <div>RESOLUCIÓN OFICIAL DEL PROGRAMA 2021060010827 DE 2021-05-20</div>
+                            <div>NIT. 890.913.319-1</div>
+                        </div>
+                        
+                        <div class="certificate-body">
+                            <p id="certificateDate">La Pintada, <span id="currentDate"></span></p>
+                            
+                            <p><strong>LA JEFE DE REGISTRO Y CONTROL</strong></p>
+                            <p><strong>CERTIFICA:</strong></p>
+                            
+                            <p>Que <span class="highlight" id="certificateStudentName"></span>, identificado(a) con documento número 
+                            <span class="highlight" id="certificateDocumentNumber"></span>, para el período 
+                            <span class="highlight">2025-1</span> se encuentra cursando el programa 
+                            <span class="highlight" id="certificateProgram"></span>.</p>
+                            
+                            <p>Este certificado se expide por solicitud del interesado(a) para los fines que estime convenientes.</p>
+                            
+                            <p>De acuerdo con la Ley 115 de 1994 y el Decreto 1075 de 2015, CESDE es una Institución 
+                            de Educación para el Trabajo y el Desarrollo Humano.</p>
+                        </div>
+                        
+                        <div class="certificate-footer">
+                            <div class="certificate-signature">
+                                <div>SANDRA MILENA BÉTANCUR DEOSSA</div>
+                                <div>Jefe de Registro y Control</div>
+                                <div>C.C. 1.128.385.408</div>
+                                
+                                <!-- Área de firma digital -->
+                                <div class="signature-container">
+                                    <canvas id="signatureCanvas" class="signature-canvas"></canvas>
+                                    <div class="signature-line"></div>
+                                    <div class="signature-actions">
+                                        <button id="clearSignature" class="btn-signature btn-clear">
+                                            <i class="fas fa-eraser"></i> Limpiar
+                                        </button>
+                                        <button id="saveSignature" class="btn-signature btn-save">
+                                            <i class="fas fa-save"></i> Guardar Firma
+                                        </button>
+                                        <button id="loadSignature" class="btn-signature btn-load">
+                                            <i class="fas fa-folder-open"></i> Cargar Firma
+                                        </button>
+                                        <input type="file" id="signatureFileInput" accept="image/*">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="certificate-details">
+                                <div>Contacto: (604) 480 88 22 ext. 2301</div>
+                                <div>Email: registroycontrol@cesde.edu.co</div>
+                                <div>Kilómetro 2 vía Puente Iglesias, La Pintada, Antioquia</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="actions">
+                        <button id="generatePdfBtn" class="btn-success">
+                            <i class="fas fa-file-pdf"></i> Descargar Certificado
+                        </button>
+                        <button id="printCertificateBtn" class="btn-secondary">
+                            <i class="fas fa-print"></i> Imprimir Certificado
+                        </button>
+                    </div>
+                </div>
+
+                <div id="loadingIndicator" class="loading-indicator">
+                    <div class="spinner"></div>
+                    <p>Generando certificado...</p>
+                </div>
+
+                <div id="errorMessage" class="error-message"></div>
+            </div>
+        </main>
+
+        <footer class="app-footer">
+            <p>© 2023 Centro de Estudios Especializados - CESDE</p>
+            <p>Sistema de Certificados Académicos v2.0</p>
+        </footer>
+    </div>
+
+    <script src="assets/js/main.js"></script>
+    <!-- Añadir esta librería para generación de PDFs -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    
+    <script>
+        // Configuración del canvas de firma
+        const canvas = document.getElementById('signatureCanvas');
+        const ctx = canvas.getContext('2d');
+        let isDrawing = false;
+        let signatureDataUrl = '';
+        
+        // Ajustar tamaño del canvas
+        function resizeCanvas() {
+            const container = canvas.parentElement;
+            canvas.width = container.offsetWidth;
+            canvas.height = 150; // Altura fija para la firma
+            ctx.strokeStyle = '#000';
+            ctx.lineWidth = 2;
+            ctx.lineCap = 'round';
+            
+            // Redibujar firma si existe
+            if(signatureDataUrl) {
+                const img = new Image();
+                img.onload = function() {
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                };
+                img.src = signatureDataUrl;
+            }
+        }
+        
+        window.addEventListener('load', resizeCanvas);
+        window.addEventListener('resize', resizeCanvas);
+        
+        // Eventos para dibujar
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('touchstart', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('touchmove', draw);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('touchend', stopDrawing);
+        canvas.addEventListener('mouseout', stopDrawing);
+        
+        function startDrawing(e) {
+            isDrawing = true;
+            draw(e);
+        }
+        
+        function draw(e) {
+            if (!isDrawing) return;
+            
+            e.preventDefault();
+            
+            // Obtener posición
+            const rect = canvas.getBoundingClientRect();
+            let clientX, clientY;
+            
+            if (e.type.includes('touch')) {
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+            } else {
+                clientX = e.clientX;
+                clientY = e.clientY;
+            }
+            
+            const x = clientX - rect.left;
+            const y = clientY - rect.top;
+            
+            ctx.lineTo(x, y);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            
+            // Actualizar la URL de datos de la firma
+            signatureDataUrl = canvas.toDataURL();
+        }
+        
+        function stopDrawing() {
+            isDrawing = false;
+            ctx.beginPath();
+            signatureDataUrl = canvas.toDataURL();
+        }
+        
+        // Limpiar firma
+        document.getElementById('clearSignature').addEventListener('click', () => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            signatureDataUrl = '';
+        });
+        
+        // Guardar firma
+        document.getElementById('saveSignature').addEventListener('click', () => {
+            signatureDataUrl = canvas.toDataURL('image/png');
+            const link = document.createElement('a');
+            link.download = 'firma.png';
+            link.href = signatureDataUrl;
+            link.click();
+        });
+        
+        // Cargar firma desde archivo
+        document.getElementById('loadSignature').addEventListener('click', () => {
+            document.getElementById('signatureFileInput').click();
+        });
+        
+        document.getElementById('signatureFileInput').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            // Verificar que sea una imagen
+            if (!file.type.match('image.*')) {
+                alert('Por favor seleccione un archivo de imagen válido (JPEG, PNG, etc.)');
+                return;
+            }
+            
+            const reader = new FileReader();
+            
+            reader.onload = (event) => {
+                const img = new Image();
+                img.onload = () => {
+                    // Limpiar canvas y dibujar la imagen cargada
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    
+                    // Calcular dimensiones para mantener la proporción
+                    const ratio = Math.min(
+                        canvas.width / img.width,
+                        canvas.height / img.height
+                    );
+                    const width = img.width * ratio;
+                    const height = img.height * ratio;
+                    const x = (canvas.width - width) / 2;
+                    const y = (canvas.height - height) / 2;
+                    
+                    ctx.drawImage(img, x, y, width, height);
+                    signatureDataUrl = canvas.toDataURL();
+                };
+                img.src = event.target.result;
+            };
+            
+            reader.onerror = () => {
+                alert('Error al leer el archivo. Por favor intente nuevamente.');
+            };
+            
+            reader.readAsDataURL(file);
+        });
+        
+        // Configuración para generar PDF
+        document.getElementById('generatePdfBtn').addEventListener('click', generatePdf);
+        
+        function generatePdf() {
+            const element = document.getElementById('certificatePreview');
+            const opt = {
+                margin: 10,
+                filename: 'certificado_cesde.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+            
+            // Mostrar indicador de carga
+            document.getElementById('loadingIndicator').style.display = 'block';
+            
+            // Generar PDF
+            html2pdf().from(element).set(opt).save().then(() => {
+                // Ocultar indicador de carga cuando termine
+                document.getElementById('loadingIndicator').style.display = 'none';
+            });
+        }
+        
+        // Configuración para imprimir
+        document.getElementById('printCertificateBtn').addEventListener('click', () => {
+            window.print();
+        });
+        
+        // Manejar el envío del formulario
+        document.getElementById('certificateForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Obtener valores del formulario
+            const studentName = document.getElementById('studentNameInput').value;
+            const documentType = document.getElementById('documentType').value;
+            const documentNumber = document.getElementById('documentNumber').value;
+            const program = document.getElementById('program').value;
+            
+            // Mostrar información del estudiante
+            document.getElementById('studentName').textContent = studentName;
+            document.getElementById('studentDocument').textContent = `${documentType} ${documentNumber}`;
+            document.getElementById('studentProgram').textContent = program;
+            
+            // Mostrar información en el certificado
+            document.getElementById('certificateStudentName').textContent = studentName;
+            document.getElementById('certificateDocumentNumber').textContent = `${documentType} ${documentNumber}`;
+            document.getElementById('certificateProgram').textContent = program;
+            
+            // Mostrar fecha actual
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            const today = new Date();
+            document.getElementById('currentDate').textContent = today.toLocaleDateString('es-ES', options);
+            
+            // Mostrar secciones
+            document.getElementById('studentInfo').style.display = 'block';
+            document.getElementById('certificatePreview').style.display = 'block';
+            
+            // Desplazarse a la vista previa
+            document.getElementById('certificatePreview').scrollIntoView({ behavior: 'smooth' });
+        });
+    </script>
+</body>
+</html>
